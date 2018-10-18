@@ -1,20 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2018/9/17 下午8:53
 # @Author  : linjie
-# @File    : mysql_util.py
 # @Des     : mysql工具类
 
 import logging
 
 import pymysql
 
+# mysql_conf = {
+#     'host': 'cdb-60q89up0.cd.tencentcdb.com',
+#     'user': 'root',
+#     'password': 'eV7-az6-GrZ-UFQ',
+#     'port': 10023,
+#     'database': 'tm_comment',
+#     'charset': 'utf8'
+# }
 mysql_conf = {
-    'host': 'cdb-60q89up0.cd.tencentcdb.com',
+    'host': 'localhost',
     'user': 'root',
-    'password': 'eV7-az6-GrZ-UFQ',
-    'port': 10023,
-    'database': 'tm_comment',
+    'password': '1111',
+    'port': 3306,
+    'database': 'wcspider',
     'charset': 'utf8'
 }
 
@@ -38,6 +44,10 @@ class MySQLUtil:
     def close(self):
         self.conn.close()
 
+    #关闭游标
+    def curclose(self):
+        self.cursor.close()
+
     # 回滚事务
     def rollback(self):
         self.conn.rollback()
@@ -60,11 +70,12 @@ class MySQLUtil:
         except Exception as e:
             logging.error('查询结果集异常{0}'.format(e))
         # 关闭游标
-        cur.close()
+        #cur.close()
         # 关闭数据连接
-        self.close()
+        #self.close()
         #返回查询结果集
         return dataList
+
     def insertOperation(self,sql):
         cur = self.get_cur()
         try:
@@ -75,8 +86,8 @@ class MySQLUtil:
             logging.error('插入失败 {}'.format(e))
             self.rollback()
 
-        cur.close()
-        self.close()
+        #cur.close()
+        #self.close()
 
     '''
     更新操作
@@ -89,23 +100,28 @@ class MySQLUtil:
         except Exception as e:
             logging.error('更新操作异常{0}'.format(e))
             self.rollback()
-        cur.close()
-        self.close()
+        #cur.close()
+        #self.close()
 
     '''
     创建相应店铺的表
     '''
     def createTable(self,tablename):
         cur = self.get_cur()
-        sql = "CREATE TABLE {0} (item_id BIGINT(50),comment text,comment_time date)".format(tablename)
+        #sql = "CREATE TABLE {0} (item_id BIGINT(1),comment text,comment_time date)".format(tablename)
+        sql = "CREATE TABLE {0}(item_id BIGINT(1) NOT NULL ,title VARCHAR(255) " \
+              ",sold BIGINT(1) ,totalSoldQuantity BIGINT(1) ,skuurl VARCHAR(255) " \
+              ",price DECIMAL(10,2),imgurl VARCHAR(255) ," \
+              "spider_start_time DATETIME ,spider_last_time DATETIME ," \
+              "PRIMARY KEY (item_id));".format(tablename)
         try:
             cur.execute(sql)
             self.commit()
         except Exception as e:
             logging.error('创建表异常{0}'.format(e))
             self.rollback()
-        cur.close()
-        self.close()
+        #cur.close()
+        #self.close()
 
     '''
     插入评论数据
@@ -120,6 +136,43 @@ class MySQLUtil:
         else:
             logging.info('插入成功')
 
+    '''
+    插入店铺信息
+    '''
+    def insertshopmsg(self,shop_id,shop_title,shop_url,shop_pin_title):
+        try:
+            sql = "insert into shopmsg(shop_id,shop_title,shop_url,shop_pin_title) value ('{0}','{1}','{2}','{3}')".format(shop_id,shop_title,shop_url,shop_pin_title)
+            logging.info('{}'.format(sql))
+            self.insertOperation(sql)
+        except Exception as e:
+            logging.error('插入数据到shop表异常 {}'.format(e))
+        else:
+            logging.info('插入数据到shop表成功')
+    '''
+    获取店铺拼音名称
+    '''
+    def getshopname(self,shop_url):
+        sql = "SELECT shop_pin_title FROM wcspider.shopmsg where shop_url={0}".format(shop_url)
+        try:
+            logging.info('{}'.format(sql))
+            self.queryOperation(sql)
+        except Exception as e:
+            logging.error('获取店铺拼音名称出现异常:{}'.format(e))
+        else:
+            logging.info('获取店铺拼音名称成功')
+
+    '''
+    插入店铺的商品信息
+    '''
+    def insertgoodsmsg(self,shopname,item_id,title,sold,totalSoldQuantity,skuurl,price,imgurl,spider_start_time,spider_last_time):
+        sql = "insert into {0} (item_id,title,sold,totalSoldQuantity,skuurl,price,imgurl,spider_start_time,spider_last_time) value ('{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}')".format(shopname,item_id,title,sold,totalSoldQuantity,skuurl,price,imgurl,spider_start_time,spider_last_time)
+        try:
+            logging.info('{}'.format(sql))
+            self.insertOperation(sql)
+        except Exception as e:
+            logging.error('插入数据到{0}表异常:{1}'.format(shopname,e))
+        else:
+            logging.info('插入数据到{}表成功'.format(shopname))
     # #获取所有总流程数据
     # #@staticmethod
     # def get_datalist(self,state):

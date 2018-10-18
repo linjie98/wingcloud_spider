@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2018/9/17 下午8:55
 # @Author  : linjie
-# @File    : spider_pretend.py
-# @Des     : 爬虫伪装
 
-#请求头
-request_headers = {
+#商品评论请求头
+request_headers_comment = {
     'connection': "keep-alive",
     'cache-control': "no-cache",
     'upgrade-insecure-requests': "1",
     'user-agent':"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1 Safari/605.1.15",
     'accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     'accept-language': "zh-CN,en-US;q=0.8,en;q=0.6"
+}
+#店铺信息请求头
+request_headers_shopmsg = {
+    'Accept': '*/*',
+    'Accept-Language': 'zh-CN',
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) FxiOS/10.6b8836 Mobile/14G60 Safari/603.3.8',
 }
 
 

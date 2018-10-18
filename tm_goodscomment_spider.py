@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2018/9/17 下午7:47
 # @Author  : linjie
-# @File    : tmall_spider.py
+# @File    : tm_goodscomment_spider.py
 # @Des     : 天猫商品评论爬虫
 
 import requests
@@ -11,9 +11,9 @@ import random
 import re
 import logging
 
-import mysql_util
-from mysql_util import MySQLUtil
-from spider_pretend import request_headers
+from util import mysql_util
+from util.mysql_util import MySQLUtil
+from spider_pretend import request_headers_comment
 
 
 '''
@@ -42,7 +42,7 @@ class tm_comment_spider:
         #天猫评论最多99页
         p =0
         page = p+1
-        while(page<3):
+        while(page<10):
             logging.info('爬到第{0}页了，再等等！'.format(page))
 
             #向url中添加的参数
@@ -56,7 +56,7 @@ class tm_comment_spider:
             # 随机休眠
             time.sleep(random.random())
             #获取网页
-            response = requests.get(url, params=param, headers=request_headers)
+            response = requests.get(url, params=param, headers=request_headers_comment)
             #返回网页内容
             data = response.text
             logging.info('打印返回的内容 : %s' % data)
