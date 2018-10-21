@@ -12,7 +12,6 @@ class ZhSwitch:
     logging.basicConfig(level=logging.DEBUG,
                         format='[%(asctime)s] %(levelname)s [%(funcName)s: %(filename)s, %(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-
     #中拼转换
     def zh_pin(word):
         s = ''
