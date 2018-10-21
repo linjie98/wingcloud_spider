@@ -17,6 +17,13 @@ request_headers_shopmsg = {
     'Accept-Language': 'zh-CN',
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) FxiOS/10.6b8836 Mobile/14G60 Safari/603.3.8',
 }
+#获取店铺url请求头
+request_headers_shopurl = {
+    'Accept': '*/*',
+    'Connection': 'keep-alive',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36'
+}
+
 
 
 
