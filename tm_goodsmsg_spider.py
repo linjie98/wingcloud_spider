@@ -29,7 +29,10 @@ class Goods_Spider:
     获取商品信息
     '''
     def getgoodsmsg(self,url):
-        shopname = re.search('https://(.*?).tmall', url).group(1)
+        if re.findall(r'(.+?):{1}',url)[0]== 'https':
+            shopname = re.search('https://(.*?).tmall', url).group(1)
+        else:
+            shopname = re.search('http://(.*?).tmall', url).group(1)
         searchurl = 'https://{}.m.tmall.com/shop/shop_auction_search.do?spm=a1z60.7754813.0.0.301755f0pZ1GjU&sort=defaul'.format(
             shopname)
         s=requests.session()
@@ -38,7 +41,7 @@ class Goods_Spider:
         js=json.loads(page1)
         total_page=int(js['total_page'])
         time.sleep(random.random() * 2)
-
+        logging.info('总页数:{}'.format(total_page))
         #获取当前时间
         nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -87,6 +90,18 @@ class Goods_Spider:
         db.close()
 
 if __name__=='__main__':
-    tm=Goods_Spider
-    #移动端的店铺地址，去掉m
-    df=tm.getgoodsmsg('https://shiyuemami.tmall.com')
+    type = ['女装', '男装', '计算机书籍', '电脑']
+    shopurl = Goods_Spider()
+    db = MySQLUtil(mysql_util.mysql_conf)
+    for index in type:
+        datalist = db.getshopurl(index)
+        #print(datalist[1][0])
+        for i in datalist:
+            #移动端的店铺地址，去掉m
+            #print(i[0])
+            logging.info('url: {}'.format(i[0]))
+            url = i[0]
+            df=shopurl.getgoodsmsg(url)
+            #print(i)
+    db.curclose()
+    db.close()
