@@ -7,20 +7,12 @@ import logging
 
 import pymysql
 
-# mysql_conf = {
-#     'host': 'cdb-60q89up0.cd.tencentcdb.com',
-#     'user': 'root',
-#     'password': 'eV7-az6-GrZ-UFQ',
-#     'port': 10023,
-#     'database': 'tm_comment',
-#     'charset': 'utf8'
-# }
 mysql_conf = {
-    'host': 'localhost',
+    'host': '数据库host',
     'user': 'root',
-    'password': '1111',
-    'port': 3306,
-    'database': 'wcspider',
+    'password': '数据库密码',
+    'port': port,
+    'database': 'wingcloud',
     'charset': 'utf8'
 }
 
@@ -74,6 +66,7 @@ class MySQLUtil:
         # 关闭数据连接
         #self.close()
         #返回查询结果集
+        logging.info('{}'.format(dataList))
         return dataList
 
     def insertOperation(self,sql):
@@ -139,9 +132,9 @@ class MySQLUtil:
     '''
     插入店铺信息
     '''
-    def insertshopmsg(self,shop_id,shop_title,shop_url,shop_pin_title):
+    def insertshopmsg(self,shop_id,shop_title,shop_url,shop_pin_title,shop_type):
         try:
-            sql = "insert into shopmsg(shop_id,shop_title,shop_url,shop_pin_title) value ('{0}','{1}','{2}','{3}')".format(shop_id,shop_title,shop_url,shop_pin_title)
+            sql = "insert into shopmsg(shop_id,shop_title,shop_url,shop_pin_title,shop_type) value ('{0}','{1}','{2}','{3}','{4}')".format(shop_id,shop_title,shop_url,shop_pin_title,shop_type)
             logging.info('{}'.format(sql))
             self.insertOperation(sql)
         except Exception as e:
@@ -152,14 +145,30 @@ class MySQLUtil:
     获取店铺拼音名称
     '''
     def getshopname(self,shop_url):
-        sql = "SELECT shop_pin_title FROM wcspider.shopmsg where shop_url={0}".format(shop_url)
+        sql = "SELECT shop_pin_title FROM wcspider.shopmsg where shop_url='{0}'".format(shop_url)
         try:
             logging.info('{}'.format(sql))
-            self.queryOperation(sql)
+            data = self.queryOperation(sql)
         except Exception as e:
             logging.error('获取店铺拼音名称出现异常:{}'.format(e))
         else:
             logging.info('获取店铺拼音名称成功')
+            return data[0][0]
+
+    '''
+    获取店铺的url
+    '''
+    def getshopurl(self,shop_type):
+        sql = "SELECT shop_url FROM wingcloud.shopmsg where shop_type = '{0}'".format(shop_type)
+        try:
+            logging.info('{}'.format(sql))
+            data = self.queryOperation(sql)
+        except Exception as e:
+            logging.error('获取店铺url异常 : {}'.format(e))
+        else:
+            logging.info('获取店铺url成功')
+            print(data)
+            return data
 
     '''
     插入店铺的商品信息
