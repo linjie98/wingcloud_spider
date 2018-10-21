@@ -30,9 +30,16 @@ class Shops_Spider:
     '''
     通过店铺URL获取店铺所有ID
     '''
-    def shopmsg(self,url):
+    def shopmsg(self,url,shop_type):
         db = MySQLUtil(mysql_util.mysql_conf)
-        shopname = re.search('https://(.*?).tmall', url).group(1)
+        logging.info('看看是不是这里')
+        print(re.findall(r'(.+?):{1}',url))
+        if re.findall(r"(.+?):{1}",url)[0]== 'https':
+            shopname = re.search('https://(.*?).tmall', url).group(1)
+            logging.info('https {}'.format(shopname))
+        else:
+            shopname = re.search('http://(.*?).tmall', url).group(1)
+            logging.info('http {}'.format(shopname))
         searchurl = 'https://{}.m.tmall.com/shop/shop_auction_search.do?spm=a1z60.7754813.0.0.301755f0pZ1GjU&sort=defaul'.format(
             shopname)
         s=requests.session()
@@ -50,7 +57,7 @@ class Shops_Spider:
         shop_pin_title_obj = ZhSwitch
         shop_pin_title = shop_pin_title_obj.zh_pin(shop_title)
 
-        db.insertshopmsg(shop_id,shop_title,url,shop_pin_title)
+        db.insertshopmsg(shop_id,shop_title,url,shop_pin_title,shop_type)
 
         #数据库关闭二连
         db.curclose()
