@@ -4,18 +4,19 @@
 # @Author  : linjie
 # @File    : tm_goodscomment_spider.py
 # @Des     : 天猫商品评论爬虫
-
+import util.mongo_util as mongo_util
 import requests
 import time
 import random
 import re
 import logging
+import pymongo
 
 from util import mysql_util
 from util.mysql_util import MySQLUtil
 from spider_pretend import request_headers_comment
-
-
+#mongodb连接
+client = pymongo.MongoClient(mongo_util.mongo_conf['host'],mongo_util.mongo_conf['port'])
 '''
 PC端 天猫商品评论爬虫
 商品id
@@ -30,7 +31,7 @@ class tm_comment_spider:
     #itemid = input("itemid:")
 
     #评论爬虫
-    def spider(self,itemid):
+    def spider(self,itemid,shopurl):
         url = "https://rate.tmall.com/list_detail_rate.htm?itemId={0}&spuId=842179060&sellerId=907782288&order=3&append=0&content=1" \
               "&tagId=&posi=&picture=&" \
               "ua=098%23E1hvB9vnvPOvUvCkvvvvvjiPPLqWzjY8RLs9sj3mPmPWljl8RLzvljtWRFqWAjlW9phvHnQGNVinzYswzv5b7MJgzRjw9HuCdphvmpvUG" \
@@ -38,10 +39,21 @@ class tm_comment_spider:
               "2B2Kz8Z0vQRAn%2BbyDCwFIAXZTKFEw9Exr08TJnDeDyO2vHd8tvpvIvvvvvhCvvvvvvUEpphvvs9vv9DCvpvQovvmmZhCv2jhvv" \
               "UEpphvWw4yCvv9vvUvQORQH1UyCvvOUvvVvayptvpvhvvvvv8wCvvpvvUmmdphvmpvWrUpGPvC1nLyCvvpvvvvv&isg=AurqQavURICRWchqI2pb1fXnO1CGWGXUUQpYDnSi0z2Kp4lhXeg-xXOVQeVA&needFold=0".format(itemid)
 
+        logging.info('{}'.format(itemid))
+        logging.info('{}'.format(shopurl))
+        mysqldb = MySQLUtil(mysql_util.mysql_conf)
+        shopname = mysqldb.getshopname(shopurl)
+        logging.info('{}'.format(shopname))
+        mysqldb.curclose()
+        mysqldb.close()
+        mongodb = client.wingcloud_comment  # test数据库
+        mongo = mongodb[shopname]  # datalist集合
 
         #天猫评论最多99页
         p =0
         page = p+1
+        temp_comment={}
+        temp_comment['item_id']=itemid
         while(page<10):
             logging.info('爬到第{0}页了，再等等！'.format(page))
 
@@ -71,7 +83,7 @@ class tm_comment_spider:
             #评论
             #评论时间
             for i in range(len(comment)):
-                db = MySQLUtil(mysql_util.mysql_conf)
+                #db = MySQLUtil(mysql_util.mysql_conf)
                 text.append((comment[i].split("\"")[3], comment_time[i].split("\"")[3]))
                 #评论
                 commentstr = text[i][0]
@@ -79,11 +91,13 @@ class tm_comment_spider:
                 #评论时间
                 times = text[i][1]
                 logging.info('%s' % times)
-                db.insertdata('tm_comm',itemid, commentstr, times)
+                #db.insertdata('tm_comm',itemid, commentstr, times)
+                temp_comment[times]=commentstr
             page = page+1
+        mongo.insert_one(temp_comment)
 
 if __name__ == '__main__':
     #test
-    itemid = input("itemid:")
+    #itemid = input("itemid:")
     sp = tm_comment_spider()
-    sp.spider(itemid)
+    sp.spider(20648664928,'https://shiyuemami.tmall.com')
